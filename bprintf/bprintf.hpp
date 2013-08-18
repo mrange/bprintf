@@ -248,7 +248,7 @@ namespace bprintf
                     begin
                 ,   end
                 ,   buffer
-                ,   args...
+                ,   std::forward<TArgs> (args)...
                 );
 
             if (result.state != frs__success)
@@ -266,7 +266,7 @@ namespace bprintf
                     format_begin
                 ,   format_end
                 ,   buffer
-                ,   args...
+                ,   std::forward<TArgs> (args)...
                 );
         }
 
@@ -306,7 +306,7 @@ namespace bprintf
                     ,   reference - 1
                     ,   format_begin
                     ,   format_end
-                    ,   std::forward<TArgs> (args)...         // TODO: std::forward<> ??
+                    ,   std::forward<TArgs> (args)...
                     );
             }
             else
