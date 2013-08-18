@@ -233,7 +233,7 @@ namespace bprintf
         }
 
         template<typename ...TArgs>
-        BPRINTF__INLINE string_type format_string (string_type const & format, TArgs&&... args)
+        BPRINTF__INLINE string_type format_string (string_type const & format, TArgs &&... args)
         {
             if (format.empty ())
             {
@@ -260,7 +260,7 @@ namespace bprintf
         }
 
         template<typename ...TArgs>
-        BPRINTF__INLINE format_result format_buffer (input_type format_begin, input_type format_end, buffer_type & buffer, TArgs&&... args)
+        BPRINTF__INLINE format_result format_buffer (input_type format_begin, input_type format_end, buffer_type & buffer, TArgs &&... args)
         {
             return format_impl (
                     format_begin
@@ -321,7 +321,7 @@ namespace bprintf
                 input_type      begin
             ,   input_type      end
             ,   buffer_type &   buffer
-            ,   TArgs&&...      args
+            ,   TArgs &&...     args
             )
         {
             if (!begin)
