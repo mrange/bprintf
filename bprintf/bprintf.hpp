@@ -109,21 +109,87 @@ namespace bprintf
                 return string_type (buffer.begin (), buffer.end ());
             }
 
-            template<typename TValue>
             BPRINTF__INLINE static format_result_state format (
                     buffer_type &   buffer
-                ,   input_type      begin
-                ,   input_type      end
-                ,   TValue &&       value
+                ,   input_type      format_begin
+                ,   input_type      format_end
+                ,   input_type      value
                 )
             {
-                assert (begin);
-                assert (end);
+                assert (format_begin);
+                assert (format_end);
+                assert (value);
 
-                return frs__formatter_failed;
+                while (*value)
+                {
+                    buffer.push_back (*value);
+                    ++value;
+                }
+
+                return frs__success;
             }
 
+            BPRINTF__INLINE static format_result_state format (
+                    buffer_type &       buffer
+                ,   input_type          format_begin
+                ,   input_type          format_end
+                ,   string_type const & value
+                )
+            {
+                assert (format_begin);
+                assert (format_end);
 
+                if (value.empty ())
+                {
+                    return frs__success;
+                }
+
+                auto begin  = &value.front ();
+                auto end    = begin + value.size ();
+
+                append_to_buffer (buffer, begin, end);
+
+                return frs__success;
+            }
+
+            static void format_impl (
+                    buffer_type &       buffer
+                ,   long long           value
+                )
+            {
+                assert (value >= 0);
+                if (value > 0)
+                {
+                    auto d = value / 10;
+                    auto r = static_cast<char> (value % 10);
+                    format_impl (buffer, d);
+                    buffer.push_back (r + '0');
+                }
+            }
+
+            BPRINTF__INLINE static format_result_state format (
+                    buffer_type &       buffer
+                ,   input_type          format_begin
+                ,   input_type          format_end
+                ,   long long           value
+                )
+            {
+                assert (format_begin);
+                assert (format_end);
+
+                if (value < 0)
+                {
+                    buffer.push_back ('-');
+                    format_impl (buffer, -value);
+                }
+                else
+                {
+                    format_impl (buffer, value);
+                }
+
+
+                return frs__success;
+            }
 
         };
     }
@@ -167,13 +233,21 @@ namespace bprintf
         }
 
         template<typename ...TArgs>
-        BPRINTF__INLINE string_type format_string (input_type  format_begin, input_type  format_end, TArgs&&... args)
+        BPRINTF__INLINE string_type format_string (string_type const & format, TArgs&&... args)
         {
+            if (format.empty ())
+            {
+                return string_type ();
+            }
+
+            auto begin  = &format.front ();
+            auto end    = begin + format.size ();
+
             buffer_type buffer;
             auto result = format_impl (
                     buffer
-                ,   format_begin
-                ,   format_end
+                ,   begin
+                ,   end
                 ,   args...
                 );
 
@@ -186,7 +260,7 @@ namespace bprintf
         }
 
         template<typename ...TArgs>
-        BPRINTF__INLINE format_result format_buffer (buffer_type & buffer, input_type  format_begin, input_type  format_end, TArgs&&... args)
+        BPRINTF__INLINE format_result format_buffer (input_type format_begin, input_type format_end, buffer_type & buffer, TArgs&&... args)
         {
             return format_impl (
                     buffer
@@ -232,7 +306,7 @@ namespace bprintf
                     ,   reference - 1
                     ,   format_begin
                     ,   format_end
-                    ,   args...         // TODO: std::forward<> ??
+                    ,   std::forward<TArgs> (args)...         // TODO: std::forward<> ??
                     );
             }
             else
@@ -283,6 +357,7 @@ namespace bprintf
                     switch (ch)
                     {
                     case '{':
+                        adaptor_type::append_to_buffer (buffer, string, iter);
                         state = ps__parameter_reference_token;
                         break;
                     default:
@@ -290,7 +365,6 @@ namespace bprintf
                     }
                     break;
                 case ps__parameter_reference_token   :
-                    adaptor_type::append_to_buffer (buffer, string, iter);
                     switch (ch)
                     {
                     case '0':

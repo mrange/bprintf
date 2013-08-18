@@ -21,8 +21,9 @@ int main()
 {
     auto formatter  = bprintf::formatter<> ();
 
-    auto string = formatter.format_string ("Hi there {0}.{1}!\r\n{0} you are {2:000} years\r\n", "John", std::string ("Doe"), 34);
+    auto string = formatter.format_string ("Hi there {0} {1}!\r\n{0} you are {2:000} years old\r\n", "John", std::string ("Doe"), 34);
 
+    printf ("%s", string.c_str ());
 
 
     return 0;
