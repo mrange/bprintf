@@ -20,9 +20,10 @@
 int main()
 {
     auto formatter  = bprintf::formatter<> ();
-    auto buffer     = formatter.get_buffer ();
 
-    formatter.format (buffer, "Hi there {0}.{1}!", "John", std::string ("Doe"));
+    auto string = formatter.format_string ("Hi there {0}.{1}!\r\n{0} you are {2:000} years\r\n", "John", std::string ("Doe"), 34);
+
+
 
     return 0;
 }

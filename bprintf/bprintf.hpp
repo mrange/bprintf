@@ -14,6 +14,7 @@
 #pragma once
 // ----------------------------------------------------------------------------
 #include <cassert>
+#include <exception>
 #include <string>
 #include <vector>
 // ----------------------------------------------------------------------------
@@ -21,6 +22,8 @@
 // ----------------------------------------------------------------------------
 namespace bprintf
 {
+    // -------------------------------------------------------------------------
+
     enum format_result_state
     {
         frs__success                    ,
@@ -31,18 +34,58 @@ namespace bprintf
         frs__reference_out_of_bounds    ,
         frs__formatter_failed           ,
     };
+    // -------------------------------------------------------------------------
+
+    typedef std::size_t size_type;
+
+    // -------------------------------------------------------------------------
+
+    struct base_exception : std::exception
+    {
+        virtual const char* what ()  const throw ()
+        {
+            return "base_exception";
+        }
+    };
+
+    struct programming_error_exception : base_exception
+    {
+        virtual const char* what ()  const throw ()
+        {
+            return "programming_error_exception";
+        }
+    };
+
+    struct format_exception : base_exception
+    {
+        format_result_state result  ;
+
+        explicit format_exception (format_result_state result)
+            :   result (result)
+        {
+
+        }
+
+        virtual const char* what ()  const throw ()
+        {
+            return "format_exception";
+        }
+    };
+
+    // -------------------------------------------------------------------------
 
     namespace detail
     {
         struct char_adaptor
         {
             typedef     char                char_type   ;
-            typedef     char const *        string_type ;
+            typedef     char const *        input_type  ;
             typedef     std::vector<char>   buffer_type ;
+            typedef     std::string         string_type ;
 
             BPRINTF__INLINE static void reserve_buffer (
                     buffer_type &   buffer
-                ,   std::size_t     size
+                ,   size_type     size
                 )
             {
                 buffer.reserve (size + buffer.size ());
@@ -50,8 +93,8 @@ namespace bprintf
 
             BPRINTF__INLINE static void append_to_buffer (
                     buffer_type &   buffer
-                ,   string_type     begin
-                ,   string_type     end
+                ,   input_type      begin
+                ,   input_type      end
                 )
             {
                 assert (begin);
@@ -59,16 +102,28 @@ namespace bprintf
                 buffer.insert (buffer.end (), begin, end);
             }
 
+            BPRINTF__INLINE static string_type to_string (
+                    buffer_type &   buffer
+                )
+            {
+                return string_type (buffer.begin (), buffer.end ());
+            }
+
             template<typename TValue>
             BPRINTF__INLINE static format_result_state format (
                     buffer_type &   buffer
-                ,   string_type     begin
-                ,   string_type     end
+                ,   input_type      begin
+                ,   input_type      end
                 ,   TValue &&       value
                 )
             {
+                assert (begin);
+                assert (end);
+
                 return frs__formatter_failed;
             }
+
+
 
         };
     }
@@ -78,21 +133,22 @@ namespace bprintf
     {
         typedef             TAdaptor                        adaptor_type    ;
         typedef typename    adaptor_type::char_type         char_type       ;
-        typedef typename    adaptor_type::string_type       string_type     ;
+        typedef typename    adaptor_type::input_type        input_type      ;
         typedef typename    adaptor_type::buffer_type       buffer_type     ;
+        typedef typename    adaptor_type::string_type       string_type     ;
 
         struct format_result
         {
             format_result_state state   ;
-            string_type         begin   ;
-            string_type         end     ;
-            string_type         last    ;
+            input_type          begin   ;
+            input_type          end     ;
+            input_type          last    ;
 
             BPRINTF__INLINE static format_result create (
                     format_result_state     state
-                ,   string_type             begin
-                ,   string_type             end  
-                ,   string_type             last
+                ,   input_type              begin
+                ,   input_type              end  
+                ,   input_type              last
                 )
             {
                 format_result result    ;
@@ -107,11 +163,30 @@ namespace bprintf
 
         BPRINTF__INLINE buffer_type get_buffer()
         {
-            return buffer_type();
+            return buffer_type ();
         }
 
         template<typename ...TArgs>
-        BPRINTF__INLINE format_result format (buffer_type & buffer, string_type format_begin, string_type format_end, TArgs&&... args)
+        BPRINTF__INLINE string_type format_string (input_type  format_begin, input_type  format_end, TArgs&&... args)
+        {
+            buffer_type buffer;
+            auto result = format_impl (
+                    buffer
+                ,   format_begin
+                ,   format_end
+                ,   args...
+                );
+
+            if (result.state != frs__success)
+            {
+                throw format_exception (result.state);
+            }
+
+            return adaptor_type::to_string (buffer);
+        }
+
+        template<typename ...TArgs>
+        BPRINTF__INLINE format_result format_buffer (buffer_type & buffer, input_type  format_begin, input_type  format_end, TArgs&&... args)
         {
             return format_impl (
                     buffer
@@ -131,10 +206,10 @@ namespace bprintf
         };
 
         static format_result_state apply_formatter (
-                buffer_type &   buffer
-            ,   std::size_t     reference
-            ,   string_type     format_begin
-            ,   string_type     format_end
+                buffer_type &   //buffer
+            ,   size_type     //reference
+            ,   input_type      //format_begin
+            ,   input_type      //format_end
             )
         {
             return frs__reference_out_of_bounds; 
@@ -143,9 +218,9 @@ namespace bprintf
         template<typename TValue, typename ...TArgs>
         static format_result_state apply_formatter (
                 buffer_type &   buffer
-            ,   std::size_t     reference
-            ,   string_type     format_begin
-            ,   string_type     format_end
+            ,   size_type     reference
+            ,   input_type      format_begin
+            ,   input_type      format_end
             ,   TValue &&       value
             ,   TArgs &&...     args
             )
@@ -170,8 +245,8 @@ namespace bprintf
         template<typename ...TArgs>
         static format_result format_impl (
                 buffer_type &   buffer
-            ,   string_type     begin
-            ,   string_type     end
+            ,   input_type      begin
+            ,   input_type      end
             ,   TArgs&&...      args
             )
         {
@@ -190,7 +265,7 @@ namespace bprintf
                 return format_result::create (frs__invalid_format, begin, end, begin);
             }
 
-            auto sz         = static_cast<std::size_t> (end - begin);
+            auto sz         = static_cast<size_type> (end - begin);
             auto state      = ps__string;
             auto iter       = begin     ;
             auto string     = begin     ;
