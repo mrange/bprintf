@@ -15,7 +15,6 @@
 // ----------------------------------------------------------------------------
 #include <cassert>
 #include <exception>
-#include <functional>
 #include <string>
 #include <vector>
 // ----------------------------------------------------------------------------
@@ -204,15 +203,6 @@ namespace bprintf
         typedef typename    adaptor_type::buffer_type       buffer_type     ;
         typedef typename    adaptor_type::string_type       string_type     ;
 
-        typedef std::function<
-            format_result_state (
-                    buffer_type &
-                ,   size_type
-                ,   input_type
-                , input_type
-                )
-            >                                               formatter_type  ;
-
         struct format_result
         {
             format_result_state state   ;
@@ -325,6 +315,48 @@ namespace bprintf
             }
         }
 
+        struct i_formatter
+        {
+            virtual format_result_state apply_formatter (
+                    buffer_type &   buffer
+                ,   size_type       reference
+                ,   input_type      format_begin
+                ,   input_type      format_end
+                ) = 0;
+        };
+
+        template<typename TPredicate>
+        struct impl_formatter : i_formatter
+        {
+            TPredicate predicate;
+            impl_formatter (TPredicate&& predicate)
+                :   predicate (std::forward<TPredicate> (predicate))
+            {
+
+            }
+
+            virtual format_result_state apply_formatter (
+                    buffer_type &   buffer
+                ,   size_type       reference
+                ,   input_type      format_begin
+                ,   input_type      format_end
+                )
+            {
+                return predicate (
+                        buffer
+                    ,   reference
+                    ,   format_begin
+                    ,   format_end
+                    );
+            }
+        };
+
+        template<typename TPredicate>
+        static impl_formatter<TPredicate> make_formatter (TPredicate && predicate)
+        {
+            return impl_formatter<TPredicate> (std::forward<TPredicate> (predicate));
+        }
+
         template<typename ...TArgs>
         static format_result format_impl (
                 input_type      begin
@@ -333,7 +365,7 @@ namespace bprintf
             ,   TArgs &&...     args
             )
         {
-            formatter_type formatter = [&] (
+            auto formatter = make_formatter ([&] (
                     buffer_type &   buffer
                 ,   size_type       reference
                 ,   input_type      format_begin
@@ -341,7 +373,7 @@ namespace bprintf
                 )
                 {
                     return apply_formatter (buffer, reference, format_begin, format_end, args...);
-                };
+                });
 
             return format_impl2 (
                     begin
@@ -356,7 +388,7 @@ namespace bprintf
                 input_type      begin
             ,   input_type      end
             ,   buffer_type &   buffer
-            ,   formatter_type  formatter
+            ,   i_formatter &   formatter
             )
         {
             if (!begin)
@@ -440,7 +472,7 @@ namespace bprintf
                         break;
                     case '}':
                         {
-                            auto result = formatter (buffer, reference, iter, iter);
+                            auto result = formatter.apply_formatter (buffer, reference, iter, iter);
                             if (result != frs__success)
                             {
                                 return format_result::create (result, begin, end, iter);
@@ -462,7 +494,7 @@ namespace bprintf
                     {
                     case '}':
                         {
-                            auto result = formatter (buffer, reference, format, iter);
+                            auto result = formatter.apply_formatter (buffer, reference, format, iter);
                             if (result != frs__success)
                             {
                                 return format_result::create (result, begin, end, iter);
