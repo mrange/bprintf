@@ -76,12 +76,13 @@ namespace bprintf
 
     namespace detail
     {
+        template<typename TChar = char>
         struct char_adaptor
         {
-            typedef     char                char_type   ;
-            typedef     char const *        input_type  ;
-            typedef     std::vector<char>   buffer_type ;
-            typedef     std::string         string_type ;
+            typedef     TChar                           char_type   ;
+            typedef     char_type const *               input_type  ;
+            typedef     std::vector<TChar>              buffer_type ;
+            typedef     std::basic_string<char_type>    string_type ;
 
             BPRINTF__INLINE static buffer_type create_buffer ()
             {
@@ -186,11 +187,10 @@ namespace bprintf
             }
 
             static void format_impl (
-                    buffer_type &       buffer
-                ,   long long           value
+                    buffer_type &           buffer
+                ,   unsigned long long      value
                 )
             {
-                assert (value >= 0);
                 if (value > 0)
                 {
                     auto d = value / 10;
@@ -205,6 +205,93 @@ namespace bprintf
                 ,   input_type          format_begin
                 ,   input_type          format_end
                 ,   long long           value
+                )
+            {
+                assert (format_begin);
+                assert (format_end);
+
+                if (value < 0)
+                {
+                    buffer.push_back ('-');
+                    format_impl (buffer, static_cast<unsigned long long> (-value));
+                }
+                else
+                {
+                    format_impl (buffer, static_cast<unsigned long long> (value));
+                }
+
+
+                return frs__success;
+            }
+
+            BPRINTF__INLINE static format_result_state format (
+                    buffer_type &       buffer
+                ,   input_type          format_begin
+                ,   input_type          format_end
+                ,   int                 value
+                )
+            {
+                return format (
+                        buffer
+                    ,   format_begin
+                    ,   format_end
+                    ,   static_cast<long long> (value)
+                    );
+            }
+
+            BPRINTF__INLINE static format_result_state format (
+                    buffer_type &       buffer
+                ,   input_type          format_begin
+                ,   input_type          format_end
+                ,   short               value
+                )
+            {
+                return format (
+                        buffer
+                    ,   format_begin
+                    ,   format_end
+                    ,   static_cast<long long> (value)
+                    );
+            }
+
+            BPRINTF__INLINE static format_result_state format (
+                    buffer_type &       buffer
+                ,   input_type          format_begin
+                ,   input_type          format_end
+                ,   char                value
+                )
+            {
+                return format (
+                        buffer
+                    ,   format_begin
+                    ,   format_end
+                    ,   static_cast<long long> (value)
+                    );
+            }
+
+            static void format_impl (
+                    buffer_type &       buffer
+                ,   double              value
+                )
+            {
+                assert (value >= 0);
+                auto i = std::floor (value);
+                auto f = value - i;
+
+                format_impl (buffer, static_cast<unsigned long long> (i));
+                buffer.push_back ('.'); // TODO: Culture specific
+
+                // TODO: Handle leading zeroes
+                // TODO: Cut trailing zeroes
+                // TODO: Handle scientific output
+                format_impl (buffer, static_cast<unsigned long long> (round (f*1000000)));
+            }
+
+            BPRINTF__INLINE static format_result_state format (
+                    buffer_type &       buffer
+                ,   input_type          format_begin
+                ,   input_type          format_end
+                ,   double              value
                 )
             {
                 assert (format_begin);
@@ -229,7 +316,7 @@ namespace bprintf
 
     // -------------------------------------------------------------------------
 
-    template<typename TAdaptor = detail::char_adaptor>
+    template<typename TAdaptor = detail::char_adaptor<>>
     struct formatter 
     {
         typedef             TAdaptor                        adaptor_type    ;
