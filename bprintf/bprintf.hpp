@@ -15,6 +15,7 @@
 // ----------------------------------------------------------------------------
 #include <cassert>
 #include <exception>
+#include <functional>
 #include <string>
 #include <vector>
 // ----------------------------------------------------------------------------
@@ -203,6 +204,15 @@ namespace bprintf
         typedef typename    adaptor_type::buffer_type       buffer_type     ;
         typedef typename    adaptor_type::string_type       string_type     ;
 
+        typedef std::function<
+            format_result_state (
+                    buffer_type &
+                ,   size_type
+                ,   input_type
+                , input_type
+                )
+            >                                               formatter_type  ;
+
         struct format_result
         {
             format_result_state state   ;
@@ -315,13 +325,38 @@ namespace bprintf
             }
         }
 
-        // TODO: Shouldn't be generic as this complex function would then be duplicated which might cause code-bloat
         template<typename ...TArgs>
         static format_result format_impl (
                 input_type      begin
             ,   input_type      end
             ,   buffer_type &   buffer
             ,   TArgs &&...     args
+            )
+        {
+            formatter_type formatter = [&] (
+                    buffer_type &   buffer
+                ,   size_type       reference
+                ,   input_type      format_begin
+                ,   input_type      format_end
+                )
+                {
+                    return apply_formatter (buffer, reference, format_begin, format_end, args...);
+                };
+
+            return format_impl2 (
+                    begin
+                ,   end
+                ,   buffer
+                ,   formatter
+                );
+        }
+
+        template<typename ...TArgs>
+        static format_result format_impl2 (
+                input_type      begin
+            ,   input_type      end
+            ,   buffer_type &   buffer
+            ,   formatter_type  formatter
             )
         {
             if (!begin)
@@ -405,7 +440,7 @@ namespace bprintf
                         break;
                     case '}':
                         {
-                            auto result = apply_formatter (buffer, reference, iter, iter, args...);
+                            auto result = formatter (buffer, reference, iter, iter);
                             if (result != frs__success)
                             {
                                 return format_result::create (result, begin, end, iter);
@@ -427,7 +462,7 @@ namespace bprintf
                     {
                     case '}':
                         {
-                            auto result = apply_formatter (buffer, reference, format, iter, args...);
+                            auto result = formatter (buffer, reference, format, iter);
                             if (result != frs__success)
                             {
                                 return format_result::create (result, begin, end, iter);

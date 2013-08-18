@@ -19,6 +19,8 @@
 #include <tchar.h>
 // ----------------------------------------------------------------------------
 #include <cassert>
+#include <exception>
+#include <functional>
 #include <string>
 #include <vector>
 // ----------------------------------------------------------------------------
