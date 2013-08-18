@@ -85,7 +85,7 @@ namespace bprintf
 
             BPRINTF__INLINE static void reserve_buffer (
                     buffer_type &   buffer
-                ,   size_type     size
+                ,   size_type       size
                 )
             {
                 buffer.reserve (size + buffer.size ());
@@ -244,10 +244,10 @@ namespace bprintf
             auto end    = begin + format.size ();
 
             buffer_type buffer;
-            auto result = format_impl (
-                    buffer
-                ,   begin
+            auto result = format_buffer (
+                    begin
                 ,   end
+                ,   buffer
                 ,   args...
                 );
 
@@ -263,9 +263,9 @@ namespace bprintf
         BPRINTF__INLINE format_result format_buffer (input_type format_begin, input_type format_end, buffer_type & buffer, TArgs&&... args)
         {
             return format_impl (
-                    buffer
-                ,   format_begin
+                    format_begin
                 ,   format_end
+                ,   buffer
                 ,   args...
                 );
         }
@@ -281,7 +281,7 @@ namespace bprintf
 
         static format_result_state apply_formatter (
                 buffer_type &   //buffer
-            ,   size_type     //reference
+            ,   size_type       //reference
             ,   input_type      //format_begin
             ,   input_type      //format_end
             )
@@ -292,7 +292,7 @@ namespace bprintf
         template<typename TValue, typename ...TArgs>
         static format_result_state apply_formatter (
                 buffer_type &   buffer
-            ,   size_type     reference
+            ,   size_type       reference
             ,   input_type      format_begin
             ,   input_type      format_end
             ,   TValue &&       value
@@ -318,9 +318,9 @@ namespace bprintf
         // TODO: Shouldn't be generic as this complex function would then be duplicated which might cause code-bloat
         template<typename ...TArgs>
         static format_result format_impl (
-                buffer_type &   buffer
-            ,   input_type      begin
+                input_type      begin
             ,   input_type      end
+            ,   buffer_type &   buffer
             ,   TArgs&&...      args
             )
         {
