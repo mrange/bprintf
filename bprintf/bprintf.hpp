@@ -83,6 +83,11 @@ namespace bprintf
             typedef     std::vector<char>   buffer_type ;
             typedef     std::string         string_type ;
 
+            BPRINTF__INLINE static buffer_type create_buffer ()
+            {
+                return buffer_type ();
+            }
+
             BPRINTF__INLINE static void reserve_buffer (
                     buffer_type &   buffer
                 ,   size_type       size
@@ -102,11 +107,39 @@ namespace bprintf
                 buffer.insert (buffer.end (), begin, end);
             }
 
+            BPRINTF__INLINE static string_type create_string ()
+            {
+                return string_type ();
+            }
+
             BPRINTF__INLINE static string_type to_string (
-                    buffer_type &   buffer
+                buffer_type const & buffer
                 )
             {
                 return string_type (buffer.begin (), buffer.end ());
+            }
+
+            BPRINTF__INLINE static bool is_empty (
+                    string_type const & string
+                )
+            {
+                return string.empty ();
+            }
+
+            BPRINTF__INLINE static input_type begin (
+                    string_type const & string
+                )
+            {
+                assert (!is_empty (string));
+                return &string.front ();
+            }
+
+            BPRINTF__INLINE static input_type end (
+                    string_type const & string
+                )
+            {
+                assert (!is_empty (string));
+                return &string.front () + string.size ();
             }
 
             BPRINTF__INLINE static format_result_state format (
@@ -229,23 +262,23 @@ namespace bprintf
             }
         };
 
-        BPRINTF__INLINE buffer_type get_buffer()
+        BPRINTF__INLINE buffer_type get_buffer ()
         {
-            return buffer_type ();
+            return adaptor_type::create_buffer ();
         }
 
         template<typename ...TArgs>
-        BPRINTF__INLINE string_type format_string (string_type const & format, TArgs &&... args)
+        string_type format_string (string_type const & format, TArgs &&... args)
         {
-            if (format.empty ())
+            if (adaptor_type::is_empty (format))
             {
-                return string_type ();
+                return adaptor_type::create_string ();
             }
 
-            auto begin  = &format.front ();
-            auto end    = begin + format.size ();
+            auto begin  = adaptor_type::begin (format);
+            auto end    = adaptor_type::end (format);
 
-            buffer_type buffer;
+            auto buffer = get_buffer ();
             auto result = format_buffer (
                     begin
                 ,   end
