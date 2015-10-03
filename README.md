@@ -5,7 +5,7 @@ bprintf is intended to be a better printf. Better in this context means type-saf
 
 There are many attempts to fix printf's lack of type-safety notably boost::format.
 
-However, all alternatives I've found have usually is beaten quite severely by printf in terms of performance. 
+However, all alternatives I've found have usually is beaten quite severely by printf in terms of performance.
 
 With bprintf I want the performance to be at least as good as with printf.
 

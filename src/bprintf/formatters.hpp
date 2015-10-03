@@ -22,31 +22,48 @@
 
 namespace better_printf
 {
-  template<>
-  struct formatter<int>
+  namespace details
   {
-    static void format (
-        formatter_context & context
-      , int                 value
+    void format__long_long (
+        formatter_context const & context
+      , long long                 value
       );
-  };
 
-  template<>
-  struct formatter<double>
+    void format__double (
+        formatter_context const & context
+      , double                    value
+      );
+  }
+
+  namespace formatters
   {
-    static void format (
-        formatter_context & context
-      , double              value
-      );
-  };
 
-  template<>
-  struct formatter<std::string>
-  {
-    static void format (
-        formatter_context & context
-      , std::string const & value
-      );
-  };
+    template<typename TIntegral>
+    constexpr std::enable_if_t<std::is_integral<TIntegral>::value> format (
+        formatter_context const & context
+      , TIntegral                 value
+      )
+    {
+      details::format__long_long (context, value);
+    }
 
+    template<typename TFloat>
+    constexpr std::enable_if_t<std::is_floating_point<TFloat>::value> format (
+        formatter_context const & context
+      , TFloat                    value
+      )
+    {
+      details::format__double (context, value);
+    }
+
+    void format (
+        formatter_context const & context
+      , char_type const *         value
+      );
+
+    void format (
+        formatter_context const & context
+      , std::string const &       value
+      );
+  }
 }

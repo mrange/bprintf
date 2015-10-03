@@ -26,6 +26,26 @@
 #include "../bprintf/core.hpp"
 #include "../bprintf/formatters.hpp"
 
+struct TestClass
+{
+};
+
+namespace better_printf
+{
+  namespace formatters
+  {
+    void format (
+        formatter_context const & context
+      , TestClass const &
+      )
+    {
+      BPRINTF_ASSERT (context.format_begin);
+      BPRINTF_ASSERT (context.format_end);
+
+      details::push_cstr (context, "{TestClass}");
+    }
+  }
+}
 namespace
 {
 
@@ -96,33 +116,35 @@ int main()
   std::string const something = "Something";
   std::string else_           = "Else";
 
+  TestClass   testClass;
+
   char const * ptr = "Again";
 
   bprintf (
-      "Hello: %2+4% %1-4:0x% %0% %3% %5% %4% %6:g% %7%\n"
+      "Hello: %2+4% %1-4:0x% %0% %3% %5% %4% %6:g% %7% %8%\n"
     , std::move (else_)
-    , 0xCAFE
+    , static_cast<std::int16_t> (0xCAFE)
     , "Yo yo"
     , std::string ("There")
     , something
     , ptr
     , 3.14
+    , testClass
     );
 
 #ifdef NDEBUG
-  auto ms = [] (auto && v) { return std::get<1> (std::forward<decltype (v)> (v)); };
+  auto measure = [] (char const * name, auto && v)
+    {
+      auto result = time_it (std::forward<decltype(v)> (v));
+      auto ms     = std::get<1> (result);
+      bprintf ("%0%: %1%\n", name, ms);
+    };
 
-  printf ("Performance run\n");
+  bprintf ("Performance run\n");
 
-  auto result_sstream   = ms (time_it (test_sstream));
-  printf ("sstream  : %llu\n", result_sstream);
-
-  auto result_sprintf   = ms (time_it (test_sprintf));
-  printf ("sprintf  : %llu\n", result_sprintf);
-
-  auto result_bsprintf  = ms (time_it (test_bsprintf));
-  printf ("bsprintf : %llu\n", result_bsprintf);
-
+  measure ("sstream"  , test_sstream);
+  measure ("sprintf"  , test_sprintf);
+  measure ("bsprintf" , test_bsprintf);
 #endif
 
   return 0;

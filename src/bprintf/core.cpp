@@ -17,6 +17,7 @@
 #include "stdafx.h"
 
 #include "core.hpp"
+#include "formatters.hpp"
 
 #include <cstdio>
 
@@ -42,7 +43,7 @@ namespace better_printf
         formatter_context & context
       )
     {
-      formatter<char_type const *>::format (context, "BPRINTF_OUT_OF_BOUNDS");
+      formatters::format (context, "BPRINTF_OUT_OF_BOUNDS");
     }
 
     bool scan (formatter_context & context)
@@ -154,16 +155,5 @@ namespace better_printf
       }
     }
 
-  }
-
-  void formatter<char_type const *>::format (
-      formatter_context const & context
-    , char_type const *         value
-    )
-  {
-    BPRINTF_ASSERT (context.format_begin);
-    BPRINTF_ASSERT (context.format_end);
-
-    details::push_cstr (context, value ? value : "");
   }
 }

@@ -130,7 +130,7 @@ namespace better_printf
       else
       {
         using value_t = std::decay_t<THead const &>;
-        formatter<value_t>::format (context, head);
+        formatters::format (context, head);
       }
     }
 
@@ -143,15 +143,6 @@ namespace better_printf
 
   template<typename T>
   struct formatter;
-
-  template<>
-  struct formatter<char_type const *>
-  {
-    static void format (
-        formatter_context const & context
-      , char_type const *         value
-      );
-  };
 
   template<typename ...TArgs>
   void bsprintf (
