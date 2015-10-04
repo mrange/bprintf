@@ -63,6 +63,14 @@ namespace
     return std::make_tuple (result, ms.count ());
   }
 
+  template<typename TPredicate>
+  void measure_it (char const * name, TPredicate && v)
+    {
+      auto result = time_it (std::forward<TPredicate> (v));
+      auto ms     = std::get<1> (result);
+      better_printf::bprintf ("%0-20%: %1%ms\n", name, ms);
+    };
+
   constexpr auto count = 1000000;
 
   int test_sstream ()
@@ -136,18 +144,11 @@ int main()
     );
 
 #ifdef NDEBUG
-  auto measure = [] (char const * name, auto && v)
-    {
-      auto result = time_it (std::forward<decltype(v)> (v));
-      auto ms     = std::get<1> (result);
-      bprintf ("%0-20%: %1%ms\n", name, ms);
-    };
-
   bprintf ("Performance run\n");
 
-  measure ("sstream"  , test_sstream);
-  measure ("sprintf"  , test_sprintf);
-  measure ("bsprintf" , test_bsprintf);
+  measure_it ("sstream"  , test_sstream);
+  measure_it ("sprintf"  , test_sprintf);
+  measure_it ("bsprintf" , test_bsprintf);
 #endif
 
   return 0;

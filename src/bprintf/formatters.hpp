@@ -27,13 +27,13 @@ namespace better_printf
   namespace details
   {
     template<typename TIntegral>
-    using enable_if_signed_integral_t   = std::enable_if_t<std::is_integral<TIntegral>::value && std::is_signed<TIntegral>::value>;
+    using enable_if_signed_integral_t   = typename std::enable_if<std::is_integral<TIntegral>::value && std::is_signed<TIntegral>::value>::type;
 
     template<typename TIntegral>
-    using enable_if_unsigned_integral_t = std::enable_if_t<std::is_integral<TIntegral>::value && std::is_unsigned<TIntegral>::value>;
+    using enable_if_unsigned_integral_t = typename std::enable_if<std::is_integral<TIntegral>::value && std::is_unsigned<TIntegral>::value>::type;
 
     template<typename TFloat>
-    using enable_if_floating_point_t    = std::enable_if_t<std::is_floating_point<TFloat>::value>;
+    using enable_if_floating_point_t    = typename std::enable_if<std::is_floating_point<TFloat>::value>::type;
 
     constexpr char_type test_token (char_type)
     {

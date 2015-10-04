@@ -42,7 +42,7 @@ namespace better_printf
       }
       else
       {
-        using value_t = std::decay_t<THead const &>;
+        using value_t = typename std::decay<THead const &>::type;
         formatters::format (context, head);
       }
     }
