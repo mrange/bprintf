@@ -14,9 +14,19 @@ In addition bprintf adopts the formatting concept from C# in order to provide ex
 Sample
 ```c++
     bprintf (
-        "Hi there %0% %1%!\n%0% you are %2:000% years old\n"
+        "Hi there %0% %1%!\n%0% you are %2:g% years old\n"
       , "John"
       , std::string ("Doe")
       , 34.5
       );
 ```
+
+TODO
+----
+
+1. Support C++11
+2. Remove sprintf usage
+3. Implement double formatting
+4. Fix how bprintf can be extended to support custom types (feels cludgy now)
+5. Manually inline code if it gives performance improvement
+6. Implement chrono formatting
