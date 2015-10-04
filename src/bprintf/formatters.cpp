@@ -167,11 +167,11 @@ namespace better_printf
         }
       } (token);
 
-      // TODO: Don't use sprintf_s
+      // TODO: Don't use sprintf
       constexpr auto buffer_size = 64U;
       char_type buffer[buffer_size];
 
-      auto sz = sprintf_s (buffer, formatter, value);
+      auto sz = sprintf (buffer, formatter, value);
       details::push_buffer (context, buffer, sz);
     }
   }
