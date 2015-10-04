@@ -14,7 +14,8 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------------------
 
-#pragma once
+#ifndef BPRINTF_CORE__HPP
+#define BPRINTF_CORE__HPP
 
 #include <cassert>
 #include <cstdint>
@@ -138,3 +139,5 @@ namespace better_printf
     details::write_to_cout (chars);
   }
 }
+
+#endif // BPRINTF_CORE__HPP

@@ -14,7 +14,9 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------------------
 
-#pragma once
+#ifndef BPRINTF_BPRINTF__HPP
+#define BPRINTF_BPRINTF__HPP
 
 #include "core.hpp"
 #include "formatters.hpp"
+#endif // BPRINTF_BPRINTF__HPP

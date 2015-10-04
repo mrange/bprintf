@@ -14,9 +14,19 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------------------
 
-#pragma once
+#ifndef BPRINTF_STDAFX__HPP
+#define BPRINTF_STDAFX__HPP
 
-#include "targetver.h"
+#include <algorithm>
+#include <cassert>
+#include <chrono>
+#include <cstdint>
+#include <cstdio>
+#include <cstdlib>
+#include <sstream>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <vector>
 
-#include <stdio.h>
-#include <tchar.h>
+#endif // BPRINTF_STDAFX__HPP

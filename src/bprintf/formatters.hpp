@@ -14,7 +14,8 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------------------
 
-#pragma once
+#ifndef BPRINTF_FORMATTERS__HPP
+#define BPRINTF_FORMATTERS__HPP
 
 #include "core.hpp"
 
@@ -173,3 +174,5 @@ namespace better_printf
       );
   }
 }
+
+#endif // BPRINTF_FORMATTERS__HPP
