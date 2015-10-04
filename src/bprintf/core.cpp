@@ -23,23 +23,23 @@
 
 namespace better_printf
 {
-  formatter_context::formatter_context (
-      chars_type &      chars
-    , char_type const * format
-    ) noexcept
-    : chars         (chars)
-    , index         (0)
-    , right_align   (false)
-    , width         (0)
-    , current       (format ? format : "")
-    , format_begin  (current)
-    , format_end    (current)
-  {
-  }
-
   namespace details
   {
-    void format (
+    formatter_context::formatter_context (
+        chars_type &  chars
+      , cstr_type     format
+      ) noexcept
+      : chars         (chars)
+      , index         (0)
+      , right_align   (false)
+      , width         (0)
+      , current       (format ? format : "")
+      , format_begin  (current)
+      , format_end    (current)
+    {
+    }
+
+    void apply_formatter (
         formatter_context & context
       )
     {
@@ -96,20 +96,52 @@ namespace better_printf
         // Found epilogue char
         auto format_end = current;
 
-        // Parse parameter index
-        auto index = 0U;
+        // TODO: Manually inline
+        //  Rationale scan() has to be fast
 
-        for (; format_begin < format_end && *format_begin >= zero_char && *format_begin <= nine_char; ++format_begin)
+        auto parse_uint64 = [&] ()
         {
-          index = index * 10 + (*format_begin - zero_char);
+          std::uint64_t result = 0;
+          for (; format_begin < format_end && *format_begin >= zero_char && *format_begin <= nine_char; ++format_begin)
+          {
+            result = result* 10 + (*format_begin - zero_char);
+          }
+          return result;
+        };
+
+        // Parse parameter index
+        auto index  = parse_uint64 ();
+        auto width  = 0LLU;
+
+        auto plus_minus_token = peek_token (format_begin, format_end, plus_char, minus_char);
+
+        if (plus_minus_token != null_char)
+        {
+          ++format_begin;
+          width = parse_uint64 ();
+        }
+
+        auto colon_token = peek_token (format_begin, format_end, colon_char);
+
+        if (colon_token != null_char)
+        {
+          ++format_begin;
+        }
+        else
+        {
+          // No custom format string found
+          format_begin = format_end;
         }
 
         ++current;
 
-        context.current       = current       ;
-        context.index         = index         ;
-        context.format_begin  = format_begin  ;
-        context.format_end    = format_end    ;
+        context.current       = current                       ;
+        context.index         = index                         ;
+        context.width         = width                         ;
+        context.right_align   = plus_minus_token == plus_char ;
+        context.fill          = space_char                    ;
+        context.format_begin  = format_begin                  ;
+        context.format_end    = format_end                    ;
 
         return true;
       }

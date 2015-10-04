@@ -18,6 +18,8 @@
 
 #include "formatters.hpp"
 
+#include <algorithm>
+
 namespace better_printf
 {
   namespace details
@@ -30,16 +32,29 @@ namespace better_printf
       BPRINTF_ASSERT (context.format_begin);
       BPRINTF_ASSERT (context.format_end);
 
-      constexpr auto buffer_size = 24U;
+      auto token = peek_token (context.format_begin, context.format_end);
 
-      auto & chars = context.chars;
-
-      chars.reserve (buffer_size + chars.size ());
+      auto formatter = [=] (char_type token)
+      {
+        switch (token)
+        {
+        case 'x':
+          return "%llx";
+        case 'X':
+          return "%llX";
+        case 'o':
+          return "%llo";
+        case 'd':
+        default:
+          return "%lld";
+        }
+      } (token);
 
       // TODO: Don't use sprintf_s
-
+      constexpr auto buffer_size = 24U;
       char_type buffer[buffer_size];
-      auto sz = sprintf_s (buffer, "%lld", value);
+
+      auto sz = sprintf_s (buffer, formatter, value);
       details::push_buffer (context, buffer, sz);
 
       //_itoa_s (value, buffer, 10);
@@ -54,17 +69,35 @@ namespace better_printf
       BPRINTF_ASSERT (context.format_begin);
       BPRINTF_ASSERT (context.format_end);
 
-      constexpr auto buffer_size = 32U;
+      auto token = peek_token (context.format_begin, context.format_end);
 
-      auto & chars = context.chars;
-
-      chars.reserve (buffer_size + chars.size ());
+      auto formatter = [=] (char_type token)
+      {
+        switch (token)
+        {
+        case 'a':
+        case 'A':
+          return "%a";
+        case 'e':
+        case 'E':
+          return "%e";
+        case 'f':
+        case 'F':
+          return "%f";
+        case 'g':
+          return "%g";
+        case 'G':
+          return "%G";
+        default:
+          return "%f";
+        }
+      } (token);
 
       // TODO: Don't use sprintf_s
-
+      constexpr auto buffer_size = 64U;
       char_type buffer[buffer_size];
-      auto sz = sprintf_s (buffer, "%g", value);
 
+      auto sz = sprintf_s (buffer, formatter, value);
       details::push_buffer (context, buffer, sz);
     }
   }
@@ -72,8 +105,8 @@ namespace better_printf
   namespace formatters
   {
     void format (
-        formatter_context const & context
-      , char_type const *         value
+        details::formatter_context const &  context
+      , cstr_type                           value
       )
     {
       BPRINTF_ASSERT (context.format_begin);
@@ -83,21 +116,14 @@ namespace better_printf
     }
 
     void format (
-        formatter_context const & context
-      , std::string const &       value
+        details::formatter_context const & context
+      , std::string const &                 value
       )
     {
       BPRINTF_ASSERT (context.format_begin);
       BPRINTF_ASSERT (context.format_end);
 
-      auto & chars = context.chars;
-
-      chars.reserve (value.size () + chars.size ());
-
-      for (auto ch : value)
-      {
-        chars.push_back (ch);
-      }
+      details::push_buffer (context, value.data (), value.size ());
     }
   }
 }
