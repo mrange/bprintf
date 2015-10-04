@@ -17,6 +17,8 @@
 #ifndef BPRINTF_STDAFX__HPP
 #define BPRINTF_STDAFX__HPP
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <algorithm>
 #include <cassert>
 #include <chrono>
