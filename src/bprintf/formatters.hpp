@@ -19,6 +19,7 @@
 
 #include "core.hpp"
 
+#include <cstring>
 #include <string>
 
 namespace better_printf
@@ -113,7 +114,7 @@ namespace better_printf
     {
       BPRINTF_ASSERT (cstr);
 
-      auto size = strlen (cstr);
+      auto size = std::strlen (cstr);
 
       push_buffer (context, cstr, size);
     }

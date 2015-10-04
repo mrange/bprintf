@@ -81,7 +81,7 @@ namespace
 
     for (auto iter = 0; iter < count; ++iter)
     {
-      sprintf_s (buffer, "Hello: %d", iter);
+      sprintf (buffer, "Hello: %d", iter);
     }
 
     return 0;
