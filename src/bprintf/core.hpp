@@ -42,6 +42,7 @@ namespace better_printf
 
     constexpr char_type const   zero_char       = '0'                   ;
     constexpr char_type const   nine_char       = '9'                   ;
+    constexpr char_type const   hex_a_char      = 'A'                   ;
 
     constexpr char_type const   plus_char       = '+'                   ;
     constexpr char_type const   minus_char      = '-'                   ;

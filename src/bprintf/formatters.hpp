@@ -24,6 +24,15 @@ namespace better_printf
 {
   namespace details
   {
+    template<typename TIntegral>
+    using enable_if_signed_integral_t   = std::enable_if_t<std::is_integral<TIntegral>::value && std::is_signed<TIntegral>::value>;
+
+    template<typename TIntegral>
+    using enable_if_unsigned_integral_t = std::enable_if_t<std::is_integral<TIntegral>::value && std::is_unsigned<TIntegral>::value>;
+
+    template<typename TFloat>
+    using enable_if_floating_point_t    = std::enable_if_t<std::is_floating_point<TFloat>::value>;
+
     constexpr char_type test_token (char_type)
     {
       return null_char;
@@ -108,9 +117,14 @@ namespace better_printf
       push_buffer (context, cstr, size);
     }
 
-    void format__long_long (
+    void format__int64 (
         formatter_context const & context
-      , long long                 value
+      , std::int64_t              value
+      );
+
+    void format__uint64 (
+        formatter_context const & context
+      , std::uint64_t             value
       );
 
     void format__double (
@@ -122,16 +136,25 @@ namespace better_printf
   namespace formatters
   {
     template<typename TIntegral>
-    constexpr std::enable_if_t<std::is_integral<TIntegral>::value> format (
+    constexpr details::enable_if_signed_integral_t<TIntegral> format (
         details::formatter_context const &  context
       , TIntegral                           value
       )
     {
-      details::format__long_long (context, value);
+      details::format__int64 (context, value);
+    }
+
+    template<typename TIntegral>
+    constexpr details::enable_if_unsigned_integral_t<TIntegral> format (
+        details::formatter_context const &  context
+      , TIntegral                           value
+      )
+    {
+      details::format__uint64 (context, value);
     }
 
     template<typename TFloat>
-    constexpr std::enable_if_t<std::is_floating_point<TFloat>::value> format (
+    constexpr details::enable_if_floating_point_t<TFloat> format (
         details::formatter_context const &  context
       , TFloat                              value
       )

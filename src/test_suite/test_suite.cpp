@@ -120,15 +120,16 @@ int main()
   char const * ptr = "Again";
 
   bprintf (
-      "Hello: %2+10% %0% 0x%1:X% %3-20% %5% %4% %6+20:g% %7% %8%\n"
+      "Hello: %2+10% %0% %1+10% 0x%1:X% %3-20% %5% %4% %6+20:g% %7% 0x%8:X% %9%\n"
     , std::move (else_)
-    , static_cast<std::int16_t> (0xCAFE)
+    , static_cast<std::uint16_t> (0xCAFE)
     , "Yo yo"
     , std::string ("There")
     , something
     , ptr
     , 3.14
     , testClass
+    , 0xCAFE
     );
 
 #ifdef NDEBUG
@@ -136,7 +137,7 @@ int main()
     {
       auto result = time_it (std::forward<decltype(v)> (v));
       auto ms     = std::get<1> (result);
-      bprintf ("%0-20%: %1%\n", name, ms);
+      bprintf ("%0-20%: %1%ms\n", name, ms);
     };
 
   bprintf ("Performance run\n");
