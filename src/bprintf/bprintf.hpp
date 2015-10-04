@@ -42,7 +42,6 @@ namespace better_printf
       }
       else
       {
-        using value_t = std::decay_t<THead const &>;
         formatters::format (context, head);
       }
     }
