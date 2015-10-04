@@ -18,6 +18,9 @@
     <ClInclude Include="..\bprintf\formatters.hpp">
       <Filter>better_printf</Filter>
     </ClInclude>
+    <ClInclude Include="..\bprintf\bprintf.hpp">
+      <Filter>better_printf</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp" />

@@ -152,6 +152,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\bprintf\bprintf.hpp" />
     <ClInclude Include="..\bprintf\core.hpp" />
     <ClInclude Include="..\bprintf\formatters.hpp" />
     <ClInclude Include="stdafx.h" />

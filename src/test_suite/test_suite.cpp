@@ -23,8 +23,7 @@
 #include <sstream>
 #include <tuple>
 
-#include "../bprintf/core.hpp"
-#include "../bprintf/formatters.hpp"
+#include "../bprintf/bprintf.hpp"
 
 struct TestClass
 {

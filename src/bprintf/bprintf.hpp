@@ -14,16 +14,7 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------------------
 
-#include "stdafx.h"
+#pragma once
 
-#include "../bprintf/bprintf.hpp"
-
-void test__linkage ()
-{
-  using namespace better_printf;
-
-  bprintf (
-      "Linkage test: %0%\n"
-    , "It works"
-    );
-}
+#include "core.hpp"
+#include "formatters.hpp"
