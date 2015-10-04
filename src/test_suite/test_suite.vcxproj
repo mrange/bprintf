@@ -156,7 +156,6 @@
     <ClInclude Include="..\bprintf\core.hpp" />
     <ClInclude Include="..\bprintf\formatters.hpp" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\bprintf\core.cpp" />

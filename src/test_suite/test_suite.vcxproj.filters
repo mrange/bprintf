@@ -11,7 +11,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="targetver.h" />
     <ClInclude Include="..\bprintf\core.hpp">
       <Filter>better_printf</Filter>
     </ClInclude>

@@ -14,7 +14,8 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------------------
 
-#pragma once
+#ifndef BPRINTF_CORE__HPP
+#define BPRINTF_CORE__HPP
 
 #include <cassert>
 #include <cstdint>
@@ -82,59 +83,7 @@ namespace better_printf
     chars_type & get_thread_local_chars ();
 
     void write_to_cout (chars_type const & chars);
-
-    void apply_formatter (
-        formatter_context & context
-      );
-
-    template<typename THead, typename ...TTail>
-    void apply_formatter (
-        formatter_context &    context
-      , THead const &          head
-      , TTail const &       ...tail
-      )
-    {
-      if (context.index != 0)
-      {
-        --context.index;
-        apply_formatter (context, tail...);
-      }
-      else
-      {
-        using value_t = std::decay_t<THead const &>;
-        formatters::format (context, head);
-      }
-    }
-  }
-
-  template<typename T>
-  struct formatter;
-
-  template<typename ...TArgs>
-  void bsprintf (
-      chars_type &  chars
-    , cstr_type     format
-    , TArgs &&      ...args
-    )
-  {
-    details::formatter_context context (chars, format);
-
-    while (details::scan (context))
-    {
-      details::apply_formatter (context, args...);
-    }
-  }
-
-  template<typename ...TArgs>
-  void bprintf (
-      cstr_type     format
-    , TArgs &&      ...args
-    )
-  {
-    auto & chars = details::get_thread_local_chars ();
-
-    bsprintf (chars, format, std::forward<TArgs> (args)...);
-
-    details::write_to_cout (chars);
   }
 }
+
+#endif // BPRINTF_CORE__HPP

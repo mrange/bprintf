@@ -14,10 +14,12 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------------------
 
-#pragma once
+#ifndef BPRINTF_FORMATTERS__HPP
+#define BPRINTF_FORMATTERS__HPP
 
 #include "core.hpp"
 
+#include <cstring>
 #include <string>
 
 namespace better_printf
@@ -112,7 +114,7 @@ namespace better_printf
     {
       BPRINTF_ASSERT (cstr);
 
-      auto size = strlen (cstr);
+      auto size = std::strlen (cstr);
 
       push_buffer (context, cstr, size);
     }
@@ -173,3 +175,5 @@ namespace better_printf
       );
   }
 }
+
+#endif // BPRINTF_FORMATTERS__HPP

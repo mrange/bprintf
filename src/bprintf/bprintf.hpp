@@ -14,7 +14,66 @@
 // limitations under the License.
 // ----------------------------------------------------------------------------------------------
 
-#pragma once
+#ifndef BPRINTF_BPRINTF__HPP
+#define BPRINTF_BPRINTF__HPP
 
 #include "core.hpp"
 #include "formatters.hpp"
+
+namespace better_printf
+{
+  namespace details
+  {
+    void apply_formatter (
+        formatter_context & context
+      );
+
+    template<typename THead, typename ...TTail>
+    void apply_formatter (
+        formatter_context &    context
+      , THead const &          head
+      , TTail const &       ...tail
+      )
+    {
+      if (context.index != 0)
+      {
+        --context.index;
+        apply_formatter (context, tail...);
+      }
+      else
+      {
+        formatters::format (context, head);
+      }
+    }
+  }
+
+  template<typename ...TArgs>
+  void bsprintf (
+      chars_type &  chars
+    , cstr_type     format
+    , TArgs &&      ...args
+    )
+  {
+    details::formatter_context context (chars, format);
+
+    while (details::scan (context))
+    {
+      details::apply_formatter (context, args...);
+    }
+  }
+
+  template<typename ...TArgs>
+  void bprintf (
+      cstr_type     format
+    , TArgs &&      ...args
+    )
+  {
+    auto & chars = details::get_thread_local_chars ();
+
+    bsprintf (chars, format, std::forward<TArgs> (args)...);
+
+    details::write_to_cout (chars);
+  }
+}
+
+#endif // BPRINTF_BPRINTF__HPP
