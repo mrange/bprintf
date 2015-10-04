@@ -23,7 +23,7 @@
 #include <sstream>
 #include <tuple>
 
-#include "../bprintf/bprintf.hpp"
+#include "../bprintf/formatters.hpp"
 
 struct TestClass
 {
@@ -45,6 +45,9 @@ namespace better_printf
     }
   }
 }
+
+#include "../bprintf/bprintf.hpp"
+
 namespace
 {
 
